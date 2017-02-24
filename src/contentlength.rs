@@ -1,5 +1,4 @@
 use hyper::header::{ContentLength, Headers};
-use std::ops::Deref;
 
 use Bytes;
 
@@ -14,9 +13,9 @@ impl GetContentLength for Headers {
     /// Function to get the `content-length` container, from a given header.
     /// This function returns an Option that contains a `Bytes` type.
     fn get_content_length(&self) -> Option<Bytes> {
-        if self.has::<ContentLength>() {
-            return Some(*self.get::<ContentLength>().unwrap().deref());
-        }
-        None
+        self.get::<ContentLength>()
+            // We need to deref it twice as it's a *double* reference!
+            // (&ContentLength -> ContentLength -> u32)
+            .map(|length| **length)
     }
 }
